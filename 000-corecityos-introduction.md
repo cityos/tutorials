@@ -72,7 +72,13 @@ import protocol CoreCityOS.LiveDataCollectionType
 ```
 
 ### Data structures
-When dealing with constant flow of live data, it’s important to define structure of that data, and more importanly, define how that data is accesed.
+`CoreCityOS` is composed of several data structures and protocols utilized for easier data access and manipulation. All of those components work together to create light yet powerfull framework. The most fundamental IOT data flow is:
+```
+Device (raw data) -> Internet (processing data) -> User (recieving processed data)
+```
+Each device reads data from it's sensors (lets say temperature and humidity) and then in real time sends the raw data to some server over the internet (or other type of communication). Server processes that data and sends it to the users in human readable form. Since all of these separate steps require different programming languages and techniques, it can be tough job to parse data from the device and send it to the user. More importantly, there is no defined data and communication standard for that kind of operations. That data standard is now created as a part of CityOS, and it can be used with this framework.
+
+To understand the data standard you must first understand data structures used:
 
 #### DataType structure
 First step is to define plain types of data you want to record, for example Temperature or Humidity. To define data types you need use `DataType` structure through extension. Let’s say that you are reading air pressure and noise data. Define it like this:
