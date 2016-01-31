@@ -155,6 +155,7 @@ class MyDeviceCollection: LiveDataCollectionType {
         ]
     }
 }
+```
 
 Note that `allReadings` array is the key requirement for `LiveDataCollectionType` protocol. You can later loop trough it and get the data points. 
 
@@ -163,7 +164,6 @@ After you adopt `LiveDataCollectionType` protocol, you get some neat features li
 ```swift
 var dataCollection = MyDeviceDataCollection()
 ```
-
 If you want to add temperature data point you can do it like this:
 
 ```swift
