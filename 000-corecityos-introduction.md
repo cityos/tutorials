@@ -121,37 +121,37 @@ Now we come to hardware device. Each hardware device you can use is equipped wit
 ```swift
 class MyDeviceCollection: LiveDataCollectionType {
 		
-		/// Device meta data
-    var deviceData = DeviceData(deviceID: "test-device")
+	/// Device meta data
+	var deviceData = DeviceData(deviceID: "test-device")
 
-		/// Creation date
-    var creationDate = NSDate()
+	/// Creation date
+	var creationDate = NSDate()
 
-		/// Wrap all `LiveDataType` instances in this array
-    var allReadings = [LiveDataType]()
+	/// Wrap all `LiveDataType` instances in this array
+	var allReadings = [LiveDataType]()
     
-		// Create temperature and humidity
-    var temperature: LiveDataType {
-        return LiveData(
-            dataType: .Temperature,
-            jsonKey: "temp",
-            unitNotation: "C"
-        )
-    }
+	// Create temperature and humidity
+	var temperature: LiveDataType {
+		return LiveData(
+            		dataType: .Temperature,
+            		jsonKey: "temp",
+            		unitNotation: "C"
+        	)
+        }
     
-    var noise: LiveDataType {
-        return LiveData(
-            dataType: .Humidity,
-            jsonKey: “humidity”,
-            unitNotation: “%”
+	var noise: LiveDataType {
+		return LiveData(
+			dataType: .Humidity,
+			jsonKey: “humidity”,
+			unitNotation: “%”
         )
     }
     
     init() {
-				// Populate the array
+	// Populate the array
         self.allReadings = [
-            temperature,
-            noise
+        	temperature,
+        	noise
         ]
     }
 }
@@ -175,5 +175,17 @@ You can also subscript with jsonKey like:
 let current = dataCollection[“humidity”].currentDataPoint
 ```
 
-This enables flexible and easy way to access all live data information.
+This enables flexible and easy way to access all live data information. After you have created `LiveDataCollectionType` classes for your devices, it's time to create the device.
+
+##### `DeviceType`
+`DeviceType` is a simple protocol that is used to describe hardware device. It requires device meta data (ID, shemaID), creationDate and `LiveDataCollectionType` instance that it manages. Example implementation would be:
+
+```swift
+public class Lamp : DeviceType {
+    public var deviceData : DeviceData = DeviceData(deviceID: "my-device")
+    public var creationDate : NSDate?
+    public var location: DeviceLocation?
+    public var dataCollection: LiveDataCollectionType = MyDeviceDataCollection()
+}
+```
 
