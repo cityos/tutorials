@@ -80,7 +80,7 @@ Each device reads data from it's sensors (lets say temperature and humidity) and
 
 To understand the data standard you must first understand data structures used:
 
-#### DataType structure
+##### `DataType`
 First step is to define plain types of data you want to record, for example Temperature or Humidity. To define data types you need use `DataType` structure through extension. Let’s say that you are reading air pressure and noise data. Define it like this:
 
 ```swift
@@ -98,8 +98,8 @@ Note that this only creates plain data types without any functionality. You will
 ```swift
 let dataPoint = DataPoint(value: 10.0)
 let dataPoint = DataPoint(value: 20.3, unixTimeStamp: 12567234.0)
-
-#### LiveDataType protocol 
+```
+##### `LiveDataType`
 
 `LiveDataType` is one of the main framework protocols that is used to define how live data looks like. Protocol requires information about data type (`DataType`), unit notation (for example db or Mhw), and json key that is used when data is serialized from JSON to core objects. Internal implementation of  `LiveDataType` is `LiveData`, although you can create your own implementation.
 
@@ -115,7 +115,7 @@ var noise: LiveDataType {
     }
 ```
 
-#### LiveDataCollectionType
+##### `LiveDataCollectionType`
 Now we come to hardware device. Each hardware device you can use is equipped with several sensors. `LiveDataCollectionType` is used to encapsulate data from these sensors using instances of `LiveDataType`. Let’s say your device has 2 sensors, temperature and humidity. You first create `LiveDataType` for temperature and humidity instances as mentioned before. Then you wrap it inside `LiveDataCollectionType` like this:
 
 ```swift
