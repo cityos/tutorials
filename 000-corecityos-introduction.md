@@ -1,21 +1,17 @@
 ## CoreCityOS framework tutorial 
 
-CoreCityOS framework is designed as an CityOS open-source data format standard in the new IOT world. Because of the framework structure which is mostly built around protocols, it can be used with any backend system on any supported platform (Linux, iOS, OS X, tvOS and watchOS). 
+CoreCityOS framework is designed as an CityOS open-source data format standard for whole IOT stack starting from harware sensors to the user mobile devices. Framework structure which is mostly built around protocols, it can be used with any backend system on any supported platform (Linux, iOS, OS X, tvOS and watchOS). 
 
-1. Installation
-2. Protocol oriented approach 
-3. Data structures
-4. Usage
-5. Creating data factory 
-6. Serializer concept 
-7. Example application
+1. [Installation](#installation)
+2. [Usage](#using-framework)
+3. [Data structures](#data-structures)
 
 ## Installation 
 
-You can use CoreCityOS in a number of ways as noted in the README file of the repository
+You can build and use `CoreCityOS` framework in a number of ways:
 
-* Swift Package Manager
 * Carthage 
+* Swift Package Manager
 * Manual embeded framework installation 
 
 **Carthage**
@@ -59,24 +55,21 @@ $ swift build
 
 ## Using framework 
 
-After you have added framework to your project you can import it with the import statement
-
+After you have added framework to your project you can import it with the import statement:
 ```swift
 import CoreCityOS
 ```
-
-or you can import data structures like:
-
+or you can import just the functionality you need:
 ```swift
 import protocol CoreCityOS.LiveDataCollectionType
 ```
 
 ### Data structures
-`CoreCityOS` is composed of several data structures and protocols utilized for easier data access and manipulation. All of those components work together to create light yet powerfull framework. The most fundamental IOT data flow is:
+`CoreCityOS` is composed of several data structures and protocols utilized for easier live data access and manipulation. All of those components work together to create light yet powerfull framework. Let's examine most basic data flow:
 ```
-Device (raw data) -> Internet (processing data) -> User (recieving processed data)
+Harware devices (sensors, raw data) -> Internet (processing data) -> User (recieving processed data)
 ```
-Each device reads data from it's sensors (lets say temperature and humidity) and then in real time sends the raw data to some server over the internet (or other type of communication). Server processes that data and sends it to the users in human readable form. Since all of these separate steps require different programming languages and techniques, it can be tough job to parse data from the device and send it to the user. More importantly, there is no defined data and communication standard for that kind of operations. That data standard is now created as a part of CityOS, and it can be used with this framework.
+Each device reads data from it's sensors and then in real time sends the raw data to some server over the internet (or any other type of communication). Server processes that data and sends it to the users in human readable form. Since all of these separate steps require different programming languages and techniques, it can be tough job to maintain whole stack from the hardware device to the user. More importantly, there is no defined data and communication standard for that kind of operations. That data standard is now created as a part of CityOS, and it can be used with this framework.
 
 To understand the data standard you must first understand data structures used:
 
@@ -101,22 +94,22 @@ let dataPoint = DataPoint(value: 20.3, unixTimeStamp: 12567234.0)
 ```
 ##### `LiveDataType`
 
-`LiveDataType` is one of the main framework protocols that is used to define how live data looks like. Protocol requires information about data type (`DataType`), unit notation (for example db or Mhw), and json key that is used when data is serialized from JSON to core objects. Internal implementation of  `LiveDataType` is `LiveData`, although you can create your own implementation.
+`LiveDataType` is one of the main framework protocols that is used to define how live data looks like. Protocol requires information about data type (`DataType`), unit notation (for example `db` or `Mhw`), and JSON key that is used when data is serialized from JSON to Swift objects. Internal implementation of `LiveDataType` is `LiveData`, which is a reccomended way to use the protocol, although you can create your own implementations.
 
-This is example definition of Noise live data type:
+This is example definition of `Noise` live data type:
 
 ```swift
 var noise: LiveDataType {
-        return LiveData(
-            dataType: DataType.Noise,
-            jsonKey: "noise",
-            unitNotation: "db"
+	return LiveData(
+		dataType: DataType.Noise,
+		jsonKey: "noise",
+		unitNotation: "db"
         )
-    }
+}
 ```
 
 ##### `LiveDataCollectionType`
-Now we come to hardware device. Each hardware device you can use is equipped with several sensors. `LiveDataCollectionType` is used to encapsulate data from these sensors using instances of `LiveDataType`. Let’s say your device has 2 sensors, temperature and humidity. You first create `LiveDataType` for temperature and humidity instances as mentioned before. Then you wrap it inside `LiveDataCollectionType` like this:
+Each hardware device that you use is equipped with several sensors. `LiveDataCollectionType` is used to encapsulate data from these sensors using instances of `LiveDataType`. For example, let's say that some device has 2 sensors that are recording temperature and humidity data. You first create `LiveDataType` for temperature and humidity instances as mentioned before. Then you wrap it inside `LiveDataCollectionType` like this:
 
 ```swift
 class MyDeviceCollection: LiveDataCollectionType {
@@ -159,33 +152,42 @@ class MyDeviceCollection: LiveDataCollectionType {
 
 Note that `allReadings` array is the key requirement for `LiveDataCollectionType` protocol. You can later loop trough it and get the data points. 
 
-After you adopt `LiveDataCollectionType` protocol, you get some neat features like subscribing. Let’s say you create instance of `MyDeviceDataCollection` like:
+After you adopt `LiveDataCollectionType` protocol, you get some neat features like subscribing functions. Let’s say you create instance of `MyDeviceDataCollection` like:
 
 ```swift
 var dataCollection = MyDeviceDataCollection()
 ```
-If you want to add temperature data point you can do it like this:
+If you want to add temperature `DataPoint` you can do it like this:
 
 ```swift
 dataCollection[.Temperature].addDataPoint(DataPoint(value: 20.0))
 ```
-You can also subscript with jsonKey like:
+You can also subscript with `jsonKey` property like:
 
 ```swift
-let current = dataCollection[“humidity”].currentDataPoint
+let currentDataPoint = dataCollection[“humidity”].currentDataPoint
 ```
-
-This enables flexible and easy way to access all live data information. After you have created `LiveDataCollectionType` classes for your devices, it's time to create the device.
+This enables flexible and easy way to access all live data information.
+> In the hardware world these data collections are know as schemas
 
 ##### `DeviceType`
-`DeviceType` is a simple protocol that is used to describe hardware device. It requires device meta data (ID, shemaID), creationDate and `LiveDataCollectionType` instance that it manages. Example implementation would be:
+`DeviceType` is a simple protocol that is used to describe hardware device. It requires device meta data (`ID`, `shemaID`), creationDate and `LiveDataCollectionType` instance that it manages. Example implementation would be:
 
 ```swift
-public class Lamp : DeviceType {
-    public var deviceData : DeviceData = DeviceData(deviceID: "my-device")
-    public var creationDate : NSDate?
+public class Lamp: DeviceType {
+    public var deviceData: DeviceData
+    public var creationDate: NSDate?
     public var location: DeviceLocation?
     public var dataCollection: LiveDataCollectionType = MyDeviceDataCollection()
+    
+    public init(deviceID: String) {
+    	self.deviceData = DeviceData(deviceID: deviceID)
+    }
 }
+```
+After that you can create instance of that particular class and access the data
+```swift
+let myLamp = Lamp(deviceID: "12345-test")
+myLamp.dataCollection[.Temperature]?.addDataPoint(DataPoint(value: 30.4))
 ```
 
