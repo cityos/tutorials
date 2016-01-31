@@ -92,6 +92,13 @@ extension DataType {
 
 Note that this only creates plain data types without any functionality. You will see how it’s used later.
 
+##### `DataPoint`
+`DataPoint` is one of the core parts of the framework that is used to create single data point in time. Each `DataPoint` is composed of some value and the `NSDate` timestamp. There are several ways to create `DataPoint`
+
+```swift
+let dataPoint = DataPoint(value: 10.0)
+let dataPoint = DataPoint(value: 20.3, unixTimeStamp: 12567234.0)
+
 #### LiveDataType protocol 
 
 `LiveDataType` is one of the main framework protocols that is used to define how live data looks like. Protocol requires information about data type (`DataType`), unit notation (for example db or Mhw), and json key that is used when data is serialized from JSON to core objects. Internal implementation of  `LiveDataType` is `LiveData`, although you can create your own implementation.
@@ -107,3 +114,66 @@ var noise: LiveDataType {
         )
     }
 ```
+
+#### LiveDataCollectionType
+Now we come to hardware device. Each hardware device you can use is equipped with several sensors. `LiveDataCollectionType` is used to encapsulate data from these sensors using instances of `LiveDataType`. Let’s say your device has 2 sensors, temperature and humidity. You first create `LiveDataType` for temperature and humidity instances as mentioned before. Then you wrap it inside `LiveDataCollectionType` like this:
+
+```swift
+class MyDeviceCollection: LiveDataCollectionType {
+		
+		/// Device meta data
+    var deviceData = DeviceData(deviceID: "test-device")
+
+		/// Creation date
+    var creationDate = NSDate()
+
+		/// Wrap all `LiveDataType` instances in this array
+    var allReadings = [LiveDataType]()
+    
+		// Create temperature and humidity
+    var temperature: LiveDataType {
+        return LiveData(
+            dataType: .Temperature,
+            jsonKey: "temp",
+            unitNotation: "C"
+        )
+    }
+    
+    var noise: LiveDataType {
+        return LiveData(
+            dataType: .Humidity,
+            jsonKey: “humidity”,
+            unitNotation: “%”
+        )
+    }
+    
+    init() {
+				// Populate the array
+        self.allReadings = [
+            temperature,
+            noise
+        ]
+    }
+}
+
+Note that `allReadings` array is the key requirement for `LiveDataCollectionType` protocol. You can later loop trough it and get the data points. 
+
+After you adopt `LiveDataCollectionType` protocol, you get some neat features like subscribing. Let’s say you create instance of `MyDeviceDataCollection` like:
+
+```swift
+var dataCollection = MyDeviceDataCollection()
+```
+
+If you want to add temperature data point you can do it like this:
+
+```swift
+dataCollection[.Temperature].addDataPoint(DataPoint(value: 20.0))
+```
+You can also subscript with jsonKey like:
+
+```swift
+let current = dataCollection[“humidity”].currentDataPoint
+```
+
+This enables flexible and easy way to access all live data information.
+
