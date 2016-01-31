@@ -10,7 +10,7 @@ CoreCityOS framework is designed as an CityOS open-source data format standard i
 6. Serializer concept 
 7. Example application
 
-### Installation 
+## Installation 
 
 You can use CoreCityOS in a number of ways as noted in the README file of the repository
 
@@ -20,7 +20,7 @@ You can use CoreCityOS in a number of ways as noted in the README file of the re
 
 **Carthage**
 
-To install CoreCityOS with Carthage package manager add following line to the Cartfile file.
+To install `CoreCityOS` with [Carthage](https://github.com/Carthage/Carthage) add following line to the `Cartfile` file.
 
 ```shell
 github “cityos/CoreCityOS” ~> 0.0.1
@@ -34,26 +34,41 @@ $ carthage update
 
 Depending on the platform you want to use it with, use the appropriate framework from `Carthage/Builds` folder. After building process use these instructions to add framework to your project.
 
+> Note that you can pass `--platform` option to the `carthage update` command to specify platform that you want to use CoreCityOS with. Carthage currently supports iOS, tvOS and OSX.
+
 **Swift Package Manager**
 
-Swift Package Manager is currently limited to Linux and OS X applications only. To use CoreCityOS with Swift Package Manager create `Package.swift` file and add following:
+[Swift Package Manager](https://github.com/apple/swift-package-manager) is currently limited to Linux and OS X applications only. To use CoreCityOS with Swift Package Manager create `Package.swift` file and add following:
 
 ```swift
 import PackageDescription
 
 let package = Package (
-  name: "CityOS",
+  name: "YOUR_PROJECT_NAME",
   dependencies: [
     .Package(url: "https://github.com/cityos/CoreCityOS.git", majorVersion: 1),
   ]
 )
 ```
-### Using framework 
+Then run following to build the framework:
+```bash
+$ swift build
+```
+
+> Note that the [Swift Package Manager](https://swift.org/package-manager) is still in early design and development, for more infomation checkout its [GitHub Page](https://github.com/apple/swift-package-manager)
+
+## Using framework 
 
 After you have added framework to your project you can import it with the import statement
 
 ```swift
 import CoreCityOS
+```
+
+or you can import data structures like:
+
+```swift
+import protocol CoreCityOS.LiveDataCollectionType
 ```
 
 ### Data structures
