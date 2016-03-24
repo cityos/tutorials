@@ -1,4 +1,4 @@
-# Creating iOS framework for communication with real IOT devices
+# Creating iOS framework for communication with real IOT devices 
 
 ## Steps
 - Introduction
@@ -13,6 +13,8 @@
 
 There is a lot of interesting IOT devices around us and each day people around the world design and create some new. Of course, making the hardware IOT device is just beginning part of the story. The real challenge with the IOT devices is how to present usable data to the device users, and this tutorial aims to show how it's done using some exciting CityOS technologies. 
 
+Code with final version available of the framework is available on [Github](https://github.com/cityos/WeatherStationFactory).
+
 ### Example framework
 
 In order to show the best possible practices and code examples we will create iOS framework that will communicate with weather station IOT device. This example is chosen because weather station device can be created by anyone with simple Arduino. 
@@ -25,18 +27,20 @@ For our example, weather station device is device that reads data from several s
 
 We will define this data in our iOS framework and later expose it to the iOS application.
 
-We are going to use CoreCityOS as a base framework for our framework so it does all heavy lifting for us. If you are not familiar with CoreCityOS framework, I suggest you to read [CoreCityOS tutorial](http://cityos.io/tutorial/1914/CoreCityOS-Framework-Tutorial) that explains in detail how CoreCityOS works with IOT devices.
+We are going to use `CoreCityOS` as a base framework for our framework so it does all heavy lifting for us. If you are not familiar with `CoreCityOS` framework, I suggest reading [CoreCityOS tutorial](http://cityos.io/tutorial/1914/CoreCityOS-Framework-Tutorial) that explains in detail how `CoreCityOS` works with IOT devices.
 
-Installation of the CoreCityOS framework will be done using [Carthage]() package manager, which will be explained in the next step
+Also, you can refer to the documentation website of the `CoreCityOS` framework that is located [here](http://cityos.github.io/CoreCityOS)
+
+Installation of the CoreCityOS framework will be done using [Carthage](https://github.com/Carthage/Carthage) package manager, which will be explained in the next step.
 
 ### Requirements
 
 Requirements for the framework we will be creating are:
 
 * Xcode 7.0+
-* Carthage
+* [Carthage](https://github.com/Carthage/Carthage)
 
-If you don't have Carthage installed you can refer to the official installation instructions, or if you have **Brew** OS X package manager you can install it by running:
+If you don't have Carthage installed you can refer to the [official installation instructions](https://github.com/Carthage/Carthage#installing-carthage), or if you have **Brew** OS X package manager you can install it by running:
 
 ```bash
 $ brew install carthage
@@ -62,9 +66,9 @@ Click on **Next**, select location of the framework and click **Next**. This wil
 
 ### Integrating the CoreCityOS framework
 
-After the initial framework setup, it's time to integrate CoreCityOS to our framework. As already mentioned, we'll be using Carthage package manager.
+After the initial framework setup, it's time to integrate CoreCityOS to our framework. As already mentioned, we'll be using [Carthage package manager](https://github.com/Carthage/Carthage).
 
-Go to the project root folder, and create new file named **Cartfile**. Cartfile is plain text file that Carthage uses to fetch frameworks you need. All you need to do is input Github link to the framework and you're done. You can use any text editor that you prefer to write contents of the file. 
+Go to the project root folder, and create new file named **Cartfile**. [Cartfile](https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile) is plain text file that Carthage uses to fetch frameworks you need. All you need to do is input Github link to the framework and you're done. You can use any text editor that you prefer to write contents of the file. 
 
 Write following to the contents of the file:
 
@@ -147,7 +151,7 @@ Now, only thing we need to do is to define them in code. Once again we will use 
 
 Create new file in your project and name it `WeatherStationDataCollection.swift`. In this file we will create our data collection definition and add it to our `WeatherStation` class that we've created earlier. To do this, we'll use `LiveDataCollectionType` protocol.
 
-In nutshell, `LiveDataCollectionType` is a protocol that wraps the data that is read by sensors in our device. Each data type (temperature, humidity etc.) is represented by `LiveDataType` protocol. To really understand this let's write the code.
+In nutshell, `LiveDataCollectionType` is a protocol that wraps the data that is read by sensors in our device. Each data type (temperature, humidity etc. ) is represented by `LiveDataType` protocol. To really understand this let's write the code.
 
 Add import statement at the top of the file:
 
