@@ -1,4 +1,4 @@
-# Creating iOS framework for communication with real IOT devices 
+# Creating iOS framework for communication with real IoT devices 
 
 ## Steps
 - Introduction
@@ -8,16 +8,17 @@
 - Integrating CoreCityOS framework
 - Defining weather station device
 - Defining weather station data collection
+- Pulling data from server
 
 ### Introduction
 
-There is a lot of interesting IOT devices around us and each day people around the world design and create some new. Of course, making the hardware IOT device is just beginning part of the story. The real challenge with the IOT devices is how to present usable data to the device users, and this tutorial aims to show how it's done using some exciting CityOS technologies. 
+There are a lot of interesting IoT devices around us and each day people around the world design and create some new. Of course, making the hardware IoT device is just beginning part of the story. The real challenge with the IoT devices is how to present useful data to the device users, and this tutorial aims to teach you how it's done using some exciting CityOS technologies. 
 
-Code with final version available of the framework is available on [Github](https://github.com/cityos/WeatherStationFactory).
+Code with final version of the framework is available on [Github](https://github.com/cityos/WeatherStationFactory).
 
 ### Example framework
 
-In order to show the best possible practices and code examples we will create iOS framework that will communicate with weather station IOT device. This example is chosen because weather station device can be created by anyone with simple Arduino. 
+In order to show the best possible practices and Swift code examples, we are going to create iOS framework that will communicate with IoT device that acts as weather station. This example is chosen because weather station device can be created by anyone with simple Arduino. 
 
 For our example, weather station device is device that reads data from several sensors:
 
@@ -27,7 +28,7 @@ For our example, weather station device is device that reads data from several s
 
 We will define this data in our iOS framework and later expose it to the iOS application.
 
-We are going to use `CoreCityOS` as a base framework for our framework so it does all heavy lifting for us. If you are not familiar with `CoreCityOS` framework, I suggest reading [CoreCityOS tutorial](http://cityos.io/tutorial/1914/CoreCityOS-Framework-Tutorial) that explains in detail how `CoreCityOS` works with IOT devices.
+We are going to use `CoreCityOS` as a base framework for our framework so it does all heavy lifting for us. If you are not familiar with `CoreCityOS` framework, I suggest reading [CoreCityOS tutorial](http://cityos.io/tutorial/1914/CoreCityOS-Framework-Tutorial) that explains in detail how `CoreCityOS` works with IoT devices.
 
 Also, you can refer to the documentation website of the `CoreCityOS` framework that is located [here](http://cityos.github.io/CoreCityOS)
 
@@ -66,7 +67,7 @@ Click on **Next**, select location of the framework and click **Next**. This wil
 
 ### Integrating the CoreCityOS framework
 
-After the initial framework setup, it's time to integrate CoreCityOS to our framework. As already mentioned, we'll be using [Carthage package manager](https://github.com/Carthage/Carthage).
+After the initial framework setup, it's time to integrate CoreCityOS to our framework. As already mentioned, we are going to use [Carthage package manager](https://github.com/Carthage/Carthage).
 
 Go to the project root folder, and create new file named **Cartfile**. [Cartfile](https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile) is plain text file that Carthage uses to fetch frameworks you need. All you need to do is input Github link to the framework and you're done. You can use any text editor that you prefer to write contents of the file. 
 
@@ -91,9 +92,9 @@ and run
 $ carthage update
 ```
 
-This command will fetch and build **CoreCityOS** framework, so that we can use the binaries in our framework. After successful building, CoreCityOS binary will be placed in `Builds/iOS` folder under the name `CoreCityOS.framework`. This is the file we will need in our framework.
+This command will fetch and build **CoreCityOS** framework, so that we can use the binaries in our framework. After successful building, CoreCityOS binary will be placed in `Cartage/Builds/iOS` folder under the name `CoreCityOS.framework`. This is the file we will need in our framework.
 
-Drag the file `CoreCityOS.framework` to your Xcode project to add it to your project. Select **Copy items if needed** checkbox and click on **Finish** button. It should look like this:
+Drag the file `CoreCityOS.framework` to your Xcode project. Select **Copy items if needed** checkbox and click on **Finish** button. It should look like this:
 
 ![Xcode files](http://i.imgur.com/4Kf3rrT.png)
 
@@ -101,9 +102,9 @@ Drag the file `CoreCityOS.framework` to your Xcode project to add it to your pro
 
 After successful integration of the CoreCityOS framework, we can use it to define our weather station devices and weather station data.
 
-Create new Swift file inside your project in Xcode and name it `WeatherStation.swift`. In this file we will define how our Weather Station device looks like.
+Create new Swift file inside your project in Xcode and name it `WeatherStation.swift`. In this file we are going to define how our Weather Station device will look like.
 
-We will use `DeviceType` protocol from the CoreCityOS framework that defines single IOT device. Reason why CoreCityOS is built around protocols is that you can just adopt protocol for any type of device and you get a ton of functionally through protocol extensions for free.
+We will use `DeviceType` protocol from the CoreCityOS framework that defines single IoT device. Reason why CoreCityOS is built around protocols is that you can just adopt protocol for any type of device and you get a ton of functionally through protocol extensions for free.
 
 Add import statement first:
 
@@ -130,12 +131,12 @@ public class WeatherStation: DeviceType {
 
 Let's go through all properties. `DeviceType` protocol requires several properties:
 
-* `deviceData` - this structure contains meta data about the device like device ID etc.
+* `deviceData` - this structure contains meta data about the device like device ID and etc.
 * `creationDate` - `NSDate` property which contains info about device creation date. It's typically read from the device itself.
 * `location` - device physical location
 * `dataCollection` - defines what data this device reads. We will write it in the next step.
 
-Also, we added init method with `deviceID` and optional `location` parameter. At this point, compiler will complain that we didn't initialized all of the properties (`dataCollection`), but don't worry about it. We will create and explain what data collection in the next step.
+Also, we added init method with `deviceID` and optional `location` parameter. At this point, compiler will complain that we didn't initialized all of the properties (`dataCollection`), but don't worry about it. We are going to create and explain what data collection in the next step.
 
 To recap, we have created `WeatherStation` device definition that is based on our hardware device. In the next step, we will define which data our weather station device can read.
 
@@ -151,7 +152,7 @@ Now, only thing we need to do is to define them in code. Once again we will use 
 
 Create new file in your project and name it `WeatherStationDataCollection.swift`. In this file we will create our data collection definition and add it to our `WeatherStation` class that we've created earlier. To do this, we'll use `LiveDataCollectionType` protocol.
 
-In nutshell, `LiveDataCollectionType` is a protocol that wraps the data that is read by sensors in our device. Each data type (temperature, humidity etc. ) is represented by `LiveDataType` protocol. To really understand this let's write the code.
+In nutshell, `LiveDataCollectionType` is a protocol that wraps the data that is read by sensors in our device. Each data type (temperature, humidity and etc. ) is represented by `LiveDataType` protocol. To really understand this let us write following code:
 
 Add import statement at the top of the file:
 
@@ -181,7 +182,7 @@ public var deviceData: DeviceData
 public var allReadings: [LiveDataType] = []
 ```
 
-You can see that `allReadings` array is empty at this point, but we will populate it in init method.
+You can see that `allReadings` array is empty at this point, but we will populate it in `init` method
 
 Next up is definition of our data. Add following to the class definition:
 
@@ -227,7 +228,7 @@ public init(deviceID: String) {
 }
 ```
 
-Our `WeatherStationDataCollection` is now ready to be linked with `WeatherStation` class. Go the the `WeatherStation.swift` file and go to the end of the init method. There, we'll init `dataCollection` property that compiler complained about.
+Our `WeatherStationDataCollection` is now ready to be linked with `WeatherStation` class. Go to the end of the `init` method inside `WeatherStation` class, and add following code.
 
 ```swift
 public init(deviceID: String, location: DeviceLocation? = nil) {
