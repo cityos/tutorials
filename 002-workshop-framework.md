@@ -10,6 +10,7 @@
 - Defining weather station data collection
 - Pulling data from server
 - Creating `WeatherStationFactory` class
+- Recap
 
 ### Introduction
 
@@ -286,3 +287,88 @@ For this class, we are going to use `FactoryType` protocol from `CoreCityOS` fra
 Protocol `FactoryType` has only one requirement and that is the singleton object named `sharedInstance`
 
 > Singleton is an object which is instantiated exactly once.
+
+Add following code:
+
+```swift
+final class WeatherStationFactory: FactoryType {
+		static var sharedInstance = WeatherStationFactory()
+}
+```
+
+This will define new class that conforms to `FactoryType` protocol and also define singleton object named `sharedInstance`. Int the future you will access all methods from this class using this object like this:
+
+```swift
+WeatherStationFactory.sharedInstance.someMethod()
+```
+
+Now, we are going to write following method that will return the data that we need through closure. Add function to the class body:
+
+```swift
+public func getLatestData(completion: (data: DeviceType?, error: ErrorType?) -> ()) {
+		// retrieve data and return it through closure
+}
+```
+
+Since data is requested asynchronously, we are using completion callback with to variables. First one is data that will return `DeviceType?` instance with data that we get from `Backend` class, and the other is `ErrorType?` which will be populated if there was an error.
+
+Now we can request data from `Backend` class. Add following code to the function definition:
+
+```swift
+Backend.requestLatestData {
+    data, error in
+    if error == nil {
+        if let data = data {
+			     // Parse dictionary here
+        }
+    } else {
+		    completion(data: nil, error: error!)
+    }
+}
+```
+
+We request for the data first and we check for errors when we get the response. If there was an error we are going to call the  completion and pass the error.
+
+Let's parse the dictionary now. Replace `// Parse dictionary here` with following code:
+
+```swift
+let weatherStationDevice = WeatherStation(deviceID: data["id"] as! String)
+                    
+let temperature = data["temperature"] as! Double
+let humidity = data["humidity"] as! Double
+let pm10 = data["pm10"] as! Double
+
+weatherStationDevice.dataCollection[.Temperature]?.addDataPoint(DataPoint(value: temperature))
+weatherStationDevice.dataCollection[.Humidity]?.addDataPoint(DataPoint(value: humidity))
+weatherStationDevice.dataCollection[.ParticleMatter10]?.addDataPoint(DataPoint(value: pm10))
+completion(data: weatherStationDevice, error: nil)
+```
+
+Here's what happens here.
+
+* We created instance of `WeatherStation` class using device ID that we got from dictionary that is returned from the server.
+* We created three variables that contain the data from the dictionary
+* We added that data to the `weatherStationDevice` using function named `addDataPoint(dataPoint:)`
+* Completion is called to return the data to the user
+
+### Recap
+
+Believe it or not, our framework is finished now. Let's recap what we've created.
+
+1. We created empty iOS framework and imported `CoreCityOS` using Carthage package manager
+2. We created class named `WeatherStation` that represents our hardware Weather Station IoT device
+3. We created class named `WeatherStationDataCollection` that represents data that is read from the sensors
+4. We fetched the data from the server using logic from `Backend` class that we downloaded
+5. We created new class named `WeatherStationFactory` that will be responsible for parsing data from `Backend` class 
+
+Now, when we need to get the data from the device, all we need to write:
+
+```swift
+WeatherStationFactory.sharedInstance.getLatestData {
+		weatherStation, error in
+		print(weatherStation.dataCollection[.Temperature])
+}
+```
+This is the example of how to get temperature data.
+
+Thanks for reading.
