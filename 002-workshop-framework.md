@@ -212,7 +212,9 @@ public var pm10: LiveDataType {
 }
 ```
 
-If you look at the code, you can see that it's pretty straight forward. We're creating `LiveDataType` computed properties by using `LiveData` structure from the `CoreCityOS` framework. We supply each one with the data type, JSON key we'll use later and unit notation. Now, all we need to do is to populate `allReadings` property.
+> If you are not sure what the `dataType` property is, you can check out [official documentation](http://cityos.github.io/CoreCityOS/master/Structs/DataType.html). Essentially it is an `enum` definition of sensor data types. `CoreCityOS` framework comes with some predefined types, like the types that we use above.
+
+If you look at the code, you can see that it's pretty straight forward. We're creating `LiveDataType` computed properties by using `LiveData` conforming structure from the `CoreCityOS` framework. We supply each one with the data type, JSON key we'll use later and unit notation. Now, all we need to do is to populate `allReadings` property.
 
 Add init method at the end of class definition:
 
@@ -232,8 +234,8 @@ Our `WeatherStationDataCollection` is now ready to be linked with `WeatherStatio
 
 ```swift
 public init(deviceID: String, location: DeviceLocation? = nil) {
-		// …
-		// …
+		// ...
+		// ...
 		dataCollection = WeatherStationDataCollection(deviceID: deviceID)
 }
 ```
