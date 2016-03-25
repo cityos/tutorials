@@ -9,6 +9,7 @@
 - Defining weather station device
 - Defining weather station data collection
 - Pulling data from server
+- Creating `WeatherStationFactory` class
 
 ### Introduction
 
@@ -241,4 +242,47 @@ public init(deviceID: String, location: DeviceLocation? = nil) {
 ```
 
 Framework should build successfully now.
-We are now done with defining our weather station device and data that it reads from sensors. Last part is actually fetching the data from your device API and serializing it to classes we just created.
+We are now done with defining our weather station device and data that it reads from sensors. Last part of the puzzle is fetching the data from your device API and serializing it to classes we've created
+
+### Pulling data from server
+
+In order to request data from the server we need to have communication with server and a way to request the data and get JSON response. Most common way is to use any Swift API for that. Some people may prefer `Alamofire` and `SwifyJSON` stack and other people may go to the Foundation implementation with classes `NSURLSession` and `NSJSONSerialization`. Since that is the case, for the purpose of this tutorial we will download this small file named [`Backend.swift`](https://raw.githubusercontent.com/cityos/WeatherStationFactory/master/WeatherStationFactory/Backend.swift) that contains logic that enables fetching data from the server. Reason we are doing this is because you may all kinds of APIs and we can't cover them all, so we're going to use data from example server that our device uses.
+
+Go ahead and download [`Backend.swift`](https://raw.githubusercontent.com/cityos/WeatherStationFactory/master/WeatherStationFactory/Backend.swift) and add it to your project.
+
+Inside this file, there is a single class named `Backend` with one method:
+
+```swift
+func requestLatestData(completion: (data: Dictionary<String, AnyObject>?, error: ErrorType?) -> ())
+```
+
+This function will return `Dictionary` object with our data in format:
+
+```swift
+(
+	"temperature" : 25.9,
+	"humidity" : 56,
+	"pm10" : 360,
+	"id" : "ghwo-251"
+)
+```
+
+> Note that this is the data that we get when we use `print` function for the returned dictionary object
+
+All of the values from the dictionary are self explanatory (`id` is ID of the device that sent the data). Now we have our data inside `Dictionary` object and all that's left to do is to connect this data with our classes `WeatherStation` and `WeatherStationDataCollection`.
+
+### Creating `WeatherStationFactory` class
+
+To correctly use the data that is returned from the `Backend` class, we will create new class and name if `WeatherStationFactory`.
+
+Go ahead and create new file named `WeatherStationFactory`. At the top of the file add import statement
+
+```swift
+import CoreCityOS
+```
+
+For this class, we are going to use `FactoryType` protocol from `CoreCityOS` framework. This protocol defines where you can get data is retrieved from the server. Reason for this is that any user of the framework knows that any structure conforming protocol `FactoryType` can be used to retrieve data. You don't need to use `FactoryType`, but it is a standard.
+
+Protocol `FactoryType` has only one requirement and that is the singleton object named `sharedInstance`
+
+> Singleton is an object which is instantiated exactly once.
