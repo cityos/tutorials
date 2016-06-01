@@ -193,7 +193,7 @@ We defined some typealiases for some structures we will use several times, adopt
 Now we can write the method for retrieving data from the backend server. Add following function to the `HydroponicsFactory` class:
 
 ```swift
-public func requestDataInTimeRange(completion: HydroponicsFactroryResult) {
+public func requestData(completion: HydroponicsFactroryResult) {
         Flowthings.requestLatestData {
             data in
             if let error = data.error {
@@ -334,3 +334,124 @@ var containerView: UIView!
 ```
 
 `timeRangeSegmentedControl` is a outlet to the segmented control with time range that we created when we created storyboard setup and `scrollView` is also a outlet view that will container sensor views. In addition we have a `UIRefreshControl` that will handle refreshing on pull and `containerView` for the scroll view.
+
+Lets setup sensor views now. Add following to to the controller:
+
+```swift
+var temperatureView: SensorView!
+var humidityView: SensorView!
+var lightView: SensorView!
+var soilHumidityView: SensorView!
+
+
+func setupSensorViews() {
+    temperatureView = UIView.loadFromNibNamed("SensorView") as! SensorView
+    humidityView = UIView.loadFromNibNamed("SensorView") as! SensorView
+    lightView = UIView.loadFromNibNamed("SensorView") as! SensorView
+    soilHumidityView = UIView.loadFromNibNamed("SensorView") as! SensorView
+    
+    temperatureView.translatesAutoresizingMaskIntoConstraints = false
+    humidityView.translatesAutoresizingMaskIntoConstraints = false
+    lightView.translatesAutoresizingMaskIntoConstraints = false
+    soilHumidityView.translatesAutoresizingMaskIntoConstraints = false
+    
+    temperatureView.layer.cornerRadius = 6
+    humidityView.layer.cornerRadius = 6
+    lightView.layer.cornerRadius = 6
+    soilHumidityView.layer.cornerRadius = 6
+    
+    temperatureView.sensorLabel.text = "Temperature"
+    humidityView.sensorLabel.text = "Humidity"
+    lightView.sensorLabel.text = "Light"
+    soilHumidityView.sensorLabel.text = "Soil humidity"
+}
+```
+
+We are creating four instances of the `SensorView` class and we initiate them from the `.xib`. Rest of the code is mostly self explanatory. Only thing you may not know about is what `.translatesAutoresizingMaskIntoConstraints = false` does. It essentially prepares views for Auto Layout. If we haven't done this, we would get tons of errors on runtime that will be hard to debug.
+
+Onto the scroll view setup. Add following function to the controller:
+
+```swift
+func setupScrollView() {
+    self.scrollView.layoutIfNeeded()
+    let frame = CGRect(x: 0, y: 0, width: scrollView.frame.width, height: 992)
+    containerView = UIView(frame: frame)
+    
+    scrollView.contentSize = containerView.bounds.size
+    scrollView.addSubview(containerView)
+    
+    containerView.addSubview(temperatureView)
+    containerView.addSubview(humidityView)
+    containerView.addSubview(lightView)
+    containerView.addSubview(soilHumidityView)
+    
+    var views = [String:AnyObject]()
+    views.updateValue(temperatureView, forKey: "temp")
+    views.updateValue(humidityView, forKey: "hum")
+    views.updateValue(lightView, forKey: "light")
+    views.updateValue(soilHumidityView, forKey: "soil")
+    
+    var constraints = [NSLayoutConstraint]()
+    constraints.appendContentsOf(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[temp]-|", options: [], metrics: nil, views: views))
+    constraints.appendContentsOf(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[hum]-|", options: [], metrics: nil, views: views))
+    constraints.appendContentsOf(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[light]-|", options: [], metrics: nil, views: views))
+    constraints.appendContentsOf(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[soil]-|", options: [], metrics: nil, views: views))
+    
+    constraints.appendContentsOf(NSLayoutConstraint.constraintsWithVisualFormat(
+            "V:|[temp(240)]-[hum(240)]-[light(240)]-[soil(240)]",
+            options: [],
+            metrics: nil,
+            views: views
+        )
+    )
+    
+    NSLayoutConstraint.activateConstraints(constraints)
+}
+```
+
+This piece of code will setup the scroll view container view and the sensor views. It will also activate constraints created with Visual Format Language.
+
+Let's move to the actual data fetching. We can write one simple function to fetch the data from LightFactory and present the data in sensor views.
+
+
+```swift
+func retrieveData() {
+    HydroponicsFactory.retrieveData() {
+        devices, error in
+        if error == nil {
+            if let device = devices?.first {
+                updateViewsWithDevice(device)
+            }
+        }
+    }
+}
+
+func updateViewsWithDevice(device: DeviceType) {
+    dispatch_async(dispatch_get_main_queue(), {
+        self.temperatureView.data = device.dataCollection[.Temperature]!
+        self.humidityView.data = device.dataCollection[.Humidity]!
+        self.lightView.data = device.dataCollection[.NaturalLight]!
+        self.soilHumidityView.data = device.dataCollection[.SoilHumidity]!
+    })
+}
+```
+
+Now go to the `viewDidLoad()` method. In this function we will call all of the functions that we created earlier. Also we will setup a timer that will call `retrieveData()` function every 5 seconds.
+
+```swift
+override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    setupSensorViews()
+    setupScrollView()
+    retrieveData()
+    
+    _ = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: #selector(retrieveData(_:)), userInfo: nil, repeats: true)
+}
+```
+
+Set the controller class inside the storyboard and connect the outlets. 
+
+Now try and build the app. It should build fine and you should be presented with the latest sensor readings data. You can now add a more functionality if you need it. Core thing you should know is how to use `HydroponicsFactory` and how to use `CoreCityOS` protocols.
+
+I hope that technologies and techniques that we used here were not too difficult to master. You can always also refer to the [official Github repository](https://github.com/cityos/hydroponics-ios) of the application and the [CoreCityOS documentation](http://cityos.github.io/CoreCityOS/master/).
