@@ -233,4 +233,104 @@ Select them both and click on **Editor > Embed > Navigation Controller**. This w
 
 Now select `UITabBarController` that was added previously and `ctrl` drag to each of the navigation controllers. When you release the key select `view controllers`. This will create the layout we described earlier.
 
-Don't worry 
+Now you can name the tabs to `Data` and `Notifications` and set the icons. 
+
+Let's move to the `Data` controllers. As we said earlier it contains one `UISegmentedController` and one `UIScrollView`.
+
+![](http://i.imgur.com/Mfm1Qxz.png)
+
+We can setup UI like this:
+
+```
+[UINavigationBar] (already present)
+
+[UIView] (container view for the segmented control)
+ └[UISegmentedControl]
+
+[UIView] (main view controller view)
+ └[UIScrollView]
+```
+
+Now create the layout. You can use simple constraints to pin the views to the edges of the view controller view and center constraints to center segmented control.
+
+After that add four segments for the `UISegmentedControl`: Minutes, Hours, Days and Months.
+
+Download [**ChartView.swift**](https://github.com/cityos/hydroponics-ios/blob/master/Hydroponics/ChartView.swift) and add it to the project. It contains some predefined logic on how to draw graphs.
+
+One last thing we need to create is the `SensorView` with graph and data reading value that you can see in the app screenshot.
+We will create it separately as single `.xib` file so that we can use it later through programmatically. 
+
+Right click on the application folder in Xcode and click on `New file`. Select iOS > User Interface on the left and click on **View**. This is a basic .xib view. Click on Next and name it `SensorView`. Next, add new empty Swift file and name it `SensorView.swift`. In that file we will create `SensorView` class that will manage the actual SensorView.
+
+When designing SensorView use `UIStackView` so you don't need to deal with constrains. This is a basic setup you need to achieve:
+
+![Sensor view](http://i.imgur.com/uNw2UZz.png)
+
+Later, we will create outlets from the `Sensor Label`, `Current Value label`, `Chart Container View` and `Time Ago Label`. `Chart Container View` is a simple empty `UIView` that will be used as a container view for the graph. 
+
+**IMPORTANT** 
+You need to set the class of the `Chart Container View` to the `ChartView`.
+
+Now move to `SensorView.swift` and add following code:
+
+```swift
+import UIKit
+import CoreCityOS
+
+class SensorView: UIView {
+    
+    //MARK: Outlets
+    @IBOutlet weak var sensorLabel: UILabel!
+    @IBOutlet weak var chartContainerView: ChartView!
+    @IBOutlet weak var currentValueLabel: UILabel!
+    @IBOutlet weak var timeAgoLabel: UILabel!
+    
+    //MARK: Sensor data
+    var data: LiveDataType! {
+        didSet {
+            setupWithData()
+        }
+    }
+    
+    func setupWithData() {
+        if let data = data
+            setupWithDataPoints(dataPoints: data.dataPoints)
+            if let currentDataPoint = data.dataPoints.last {
+                let valueString = NSString(format: "%.2f", currentDataPoint.value)
+                self.currentValueLabel.text = valueString as String
+            }
+        }
+    }
+    
+    //MARK: Functions and properties
+    func setupWithDataPoints(dataPoints points: [DataPoint]) {
+        chartContainerView.dataPoints = points
+        chartContainerView.commonInit()
+        chartContainerView.setupChart()
+        chartContainerView.render()
+    }
+}
+```
+
+We are creating 4 outlets for the views that we defined earlier. We have `data` property that is used to present data in chart and other labels. 
+
+>> LiveDataType is used to store data in form of data points. Refer to the CoreCityOS documentation for more details.
+
+This is all the code that we need for the Sensor view. Now switch back to the `SensorView.xib` and set the main view class to `SensorView` and connect outlets. Now we have connected the view with it's class and we are ready to continue. 
+
+### 6.  `SensorReadingsViewController`
+
+
+Create new `SensorReadingsViewController` inside new `SensorReadingsViewController.swift` file. This controller will be in charge of retrieving data from `HydroponicsFactory` and presenting it in `SensorView` views that we created earlier. Add `import CoreCityOS` at the top of the file. 
+
+Add following code to the class:
+
+```swift
+@IBOutlet weak var timeRangeSegmentedControl: UISegmentedControl!
+@IBOutlet weak var scrollView: UIScrollView!
+    
+var refreshControl = UIRefreshControl()
+var containerView: UIView!
+```
+
+`timeRangeSegmentedControl` is a outlet to the segmented control with time range that we created when we created storyboard setup and `scrollView` is also a outlet view that will container sensor views. In addition we have a `UIRefreshControl` that will handle refreshing on pull and `containerView` for the scroll view.
