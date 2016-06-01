@@ -209,3 +209,28 @@ public func requestDataInTimeRange(completion: HydroponicsFactroryResult) {
 
 This function will request and return latest data sent to the Flowthings backend. Later in the application we will run this function each 10 seconds to update to latest readings.
 
+### 5. Application UI
+
+To understand views and controllers that wee need to create, lets first look at the application layout:
+
+![CityOS GRO](https://camo.githubusercontent.com/bbef76cbf53d8c5a0ff2180776fac508b1c91aa9/687474703a2f2f692e696d6775722e636f6d2f3941335a365a422e706e67)
+
+And this is storyboard setup we want to achieve:
+
+![Storyboard layout](http://i.imgur.com/CxgCTkj.png)
+
+We can see that it's made up of one `UITabBarController` with two embedded `UINavigationController` controllers, one for the data readings and one for the notifications.
+
+Data controller is simple `UIViewController` with `UISegmentedControl` at the top and the `UIScrollView` filling the rest of the view.
+
+Notifications controller is simple `UITableViewController`.
+
+Go to the **Main.storyboard** and delete any existing controller.  Drag one `UITabBarController` from the object library to the storyboard and check **Is Initial view controller**. 
+
+After that drag one `UIViewController` (for data readings) and one `UITableViewController` (for notifications) to the storyboard.
+
+Select them both and click on **Editor > Embed > Navigation Controller**. This will wrap them inside `UINavigationController`.
+
+Now select `UITabBarController` that was added previously and `ctrl` drag to each of the navigation controllers. When you release the key select `view controllers`. This will create the layout we described earlier.
+
+Don't worry 
