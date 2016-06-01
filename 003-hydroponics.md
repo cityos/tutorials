@@ -163,3 +163,49 @@ public class Hydroponics: DeviceType, CustomStringConvertible {
 ```
 
 Again, setup is pretty simple. We created new class named Hydroponics and adopted `DeviceType` protocol and fulfilled necessary requirements such as data collection and device meta data. 
+
+### 4. Flowthings backend 
+
+Hydroponics reads data from the sensors and uses wifi to send the data to Flowthings backend system. In our application we will fetch the data from the Flowthings backend using `NSURLSession` APIs from iOS. To get started download this file and add it to your application.
+
+[**Flowthings.swift**](https://github.com/cityos/hydroponics-ios/blob/master/HydroponicsFactory/Flowthings.swift)
+
+Now we can fetch the data from the backend. First create new file and name it **HydroponicsFactory.swift**. Class in this file will be in charge of fetching the raw data from Flowthings and returning `HydroponicsDevice` and `HydroponicsDataCollection` objects that we have created earlier.
+
+Add following class declaration to the file:
+
+```swift
+import CoreCityOS
+
+public typealias HydroponicsFactroryResult = (devices: [DeviceType]?, error: ErrorType?) -> Void
+public typealias NotificationPayload = String
+
+final public class HydroponicsFactory: FactoryType {
+    public static let sharedInstance = HydroponicsFactory()
+    
+}
+
+```
+    
+    
+We defined some typealiases for some structures we will use several times, adopted `FactoryType` protocol from CoreCityOS and created singleton object.
+
+Now we can write the method for retrieving data from the backend server. Add following function to the `HydroponicsFactory` class:
+
+```swift
+public func requestDataInTimeRange(completion: HydroponicsFactroryResult) {
+        Flowthings.requestLatestData {
+            data in
+            if let error = data.error {
+                completion(devices: nil, error: error)
+            } else {
+                if let device = data.device {
+                    completion(devices: [device], error: nil)
+                }
+            }
+        }
+    }
+```
+
+This function will request and return latest data sent to the Flowthings backend. Later in the application we will run this function each 10 seconds to update to latest readings.
+
